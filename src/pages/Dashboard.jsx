@@ -7,7 +7,7 @@ import PlayerDashboard from './PlayerDashboard';
 
 export default function Dashboard() {
   const { userDoc } = useAuth();
-  const { isOwner, isManager, isGameTeamManager, isPlayer } = useRole();
+  const { isOwner, isManager, isGameTeamManager, isCoach, isPlayer } = useRole();
 
   // Wait for userDoc to fully resolve before rendering — prevents Player Dashboard flash
   if (!userDoc || !userDoc.role) {
@@ -21,8 +21,8 @@ export default function Dashboard() {
   // Priority: Owner → Manager → GameTeamManager → Player
   if (isOwner()) return <OwnerDashboard />;
   if (isManager()) return <ManagerDashboard />;
-  // Game Team Manager gets the Manager dashboard with filtered view
-  if (isGameTeamManager()) return <ManagerDashboard />;
+  // Game Team Manager & Coach get the Manager dashboard with filtered view
+  if (isGameTeamManager() || isCoach()) return <ManagerDashboard />;
   if (isPlayer()) return <PlayerDashboard />;
 
   // Fallback
