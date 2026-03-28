@@ -11,7 +11,7 @@ import { AreaChart, Area, XAxis, YAxis, ResponsiveContainer, Tooltip } from 'rec
 import toast from 'react-hot-toast';
 
 export default function Financials() {
-  const { user } = useAuth();
+  const { user, userDoc } = useAuth();
   const { remove } = useFirestoreDelete('financial_logs');
   const { data: logs, loading } = useCollection('financial_logs', [], 'createdAt');
   const { data: players } = useCollection('players');
@@ -223,7 +223,7 @@ export default function Financials() {
                       )}
                     </td>
                     <td className="px-6 py-5 text-right">
-                      {user?.role === 'owner' ? (
+                      {userDoc?.role === 'owner' ? (
                         <button 
                           onClick={() => {
                             if(window.confirm('WARNING: Permanently delete this transaction record?')) {
