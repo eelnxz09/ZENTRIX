@@ -218,6 +218,7 @@ export default function RolesPage() {
                       <span className={`px-2 py-0.5 text-[9px] font-black uppercase tracking-widest rounded ${
                         u.role === 'manager' ? 'bg-cyan-400/10 text-cyan-400' : 
                         u.role === 'game_team_manager' ? 'bg-purple-400/10 text-purple-400' :
+                        u.role === 'coach' ? 'bg-orange-400/10 text-orange-400' :
                         'bg-slate-400/10 text-slate-400'
                       }`}>{ROLE_LABELS[u.role] || u.role}</span>
                     </td>
@@ -230,6 +231,7 @@ export default function RolesPage() {
                       >
                         <option value="player">Player</option>
                         <option value="game_team_manager">Team Manager</option>
+                        <option value="coach">Team Coach</option>
                         <option value="manager">Esports Manager</option>
                       </select>
                     </td>
