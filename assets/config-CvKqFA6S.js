@@ -1,1 +1,0 @@
-import{T as e,_ as t,n,y as r}from"./firebase-DcxzoNPS.js";var i=e({apiKey:`mock-key`,authDomain:`mock-domain`,projectId:`mock-project`,storageBucket:`mock-bucket`,messagingSenderId:`1234`,appId:`1:123`});r(i);var a=t(i),o=n(i);export{a as n,o as r,i as t};
