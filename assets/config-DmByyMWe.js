@@ -1,0 +1,1 @@
+import{T as e,_ as t,n,y as r}from"./firebase-Jv5XgPjk.js";var i=e({apiKey:`AIzaSyAufqAXmRXZjc81aR6jTZlMbmss96RysF8`,authDomain:`zentrix-e5a7c.firebaseapp.com`,projectId:`zentrix-e5a7c`,storageBucket:`zentrix-e5a7c.firebasestorage.app`,messagingSenderId:`878573994076`,appId:`1:878573994076:web:5201433780cc84de232699`});r(i);var a=t(i),o=n(i);export{a as n,o as r,i as t};
