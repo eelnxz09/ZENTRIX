@@ -51,7 +51,6 @@ export const PERMISSIONS = {
   // Settings
   VIEW_SETTINGS:          'view_settings',
   EDIT_SETTINGS:          'edit_settings',
-  VIEW_NOTIFICATIONS:     'view_notifications',
 };
 
 // ━━━ HARDCODED CREDENTIAL MAP ━━━
@@ -143,19 +142,15 @@ export const ROLE_DEFAULTS = {
   ],
 
   [ROLES.COACH]: [
-    // Performance focus — View/Edit players & teams + Full Scrims
+    // Tactical oversight — View only for players/teams, but manages scrims
     PERMISSIONS.VIEW_PLAYERS,
-    PERMISSIONS.EDIT_PLAYERS,
     PERMISSIONS.VIEW_TEAMS,
-    PERMISSIONS.EDIT_TEAMS,
     PERMISSIONS.VIEW_TOURNAMENTS,
-    PERMISSIONS.EDIT_TOURNAMENTS,
     PERMISSIONS.VIEW_SCRIMS,
     PERMISSIONS.MANAGE_SCRIMS,
-    PERMISSIONS.VIEW_ANALYTICS,
     PERMISSIONS.VIEW_CERTIFICATES,
+    PERMISSIONS.VIEW_ANALYTICS,
     PERMISSIONS.VIEW_SETTINGS,
-    PERMISSIONS.VIEW_NOTIFICATIONS,
   ],
 
   [ROLES.PLAYER]: [
@@ -175,8 +170,7 @@ export function hasPermission(userPermissions, permission) {
 }
 
 export function getDefaultPermissions(role) {
-  const perms = ROLE_DEFAULTS[role] || ROLE_DEFAULTS[ROLES.PLAYER];
-  return perms.filter(p => p !== undefined);
+  return ROLE_DEFAULTS[role] || ROLE_DEFAULTS[ROLES.PLAYER];
 }
 
 export function getRoleForEmail(email) {
