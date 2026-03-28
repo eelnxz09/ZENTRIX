@@ -5,6 +5,7 @@ import { GlassCard } from '../components/ui/GlassCard';
 import { NeonButton } from '../components/ui/NeonButton';
 import toast from 'react-hot-toast';
 import { Shield, Eye, EyeOff } from 'lucide-react';
+import LOGO_BASE64 from '../utils/zkLogoBase64.js';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -48,8 +49,8 @@ export default function Login() {
       <GlassCard elevated className="w-full max-w-md z-10 p-8 border border-white/10 relative overflow-hidden" delay={0.2}>
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-cyan-400/10 border border-cyan-400/30 flex items-center justify-center">
-            <Shield size={28} className="text-cyan-400" />
+          <div className="w-20 h-20 mx-auto mb-4 rounded-2xl bg-cyan-400/5 border border-cyan-400/20 flex items-center justify-center overflow-hidden">
+            <img src={LOGO_BASE64} alt="Zentrix Logo" className="w-[85%] h-[85%] object-contain" />
           </div>
           <h2 className="text-3xl font-black font-display tracking-widest text-white uppercase text-glow-cyan mb-1">
             Zentrix <span className="text-cyan-400 font-light">OS</span>
