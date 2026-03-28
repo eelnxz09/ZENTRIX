@@ -77,25 +77,29 @@ export default function Scrims() {
                 {s.status === 'scheduled' && (
                     <PermissionGuard permission="manage_scrims">
                         <NeonButton 
-                          variant={s.paymentProofUrl ? "secondary" : "danger"} 
+                          variant={(s.paymentProofUrl || s.isFree) ? "secondary" : "danger"} 
                           className="flex-1 justify-center py-2 border-pink-500/30" 
-                          disabled={!s.paymentProofUrl}
+                          disabled={!s.paymentProofUrl && !s.isFree}
                           onClick={async () => {
                             await update(s.id, { status: 'live', startTime: Date.now() });
                             toast.success('Scrim matches initialized! 🎮');
                         }}>
-                           {s.paymentProofUrl ? <><Play size={14} /> Start Scrim</> : <><Camera size={14} /> Upload Fee First</>}
+                           {(s.paymentProofUrl || s.isFree) ? <><Play size={14} /> Start Scrim</> : <><Camera size={14} /> Upload Fee First</>}
                         </NeonButton>
                     </PermissionGuard>
                 )}
                 
-                <PermissionGuard permission="manage_scrims">
+                 <PermissionGuard permission="manage_scrims">
                    <button 
-                     onClick={() => setPaymentScrim(s)}
-                     className={`flex items-center gap-2 px-3 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider border transition-colors ${s.paymentProofUrl ? 'border-green-500/50 bg-green-500/10 text-green-400' : 'border-pink-500/50 bg-pink-500/10 text-pink-400 hover:bg-pink-500/20'}`}
+                     onClick={() => !s.isFree && setPaymentScrim(s)}
+                     className={`flex items-center gap-2 px-3 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider border transition-colors ${
+                       s.isFree ? 'border-cyan-500/50 bg-cyan-500/10 text-cyan-400 cursor-default' :
+                       s.paymentProofUrl ? 'border-green-500/50 bg-green-500/10 text-green-400' : 
+                       'border-pink-500/50 bg-pink-500/10 text-pink-400 hover:bg-pink-500/20'
+                     }`}
                    >
-                     {s.paymentProofUrl ? <CheckmarkIcon /> : <Camera size={14} />} 
-                     {s.paymentProofUrl ? "Paid" : "Verify Payment"}
+                     {s.isFree ? <><Activity size={12} /> Free Match</> : s.paymentProofUrl ? <CheckmarkIcon /> : <Camera size={14} />} 
+                     {!s.isFree && (s.paymentProofUrl ? "Paid" : "Verify Payment")}
                    </button>
                 </PermissionGuard>
               </div>
@@ -171,7 +175,7 @@ function LiveScrimPanel({ scrim, onEnd }) {
 }
 
 function AddScrimModal({ onClose }) {
-  const [form, setForm] = useState({ opponent: '', game: 'BGMI' });
+  const [form, setForm] = useState({ opponent: '', game: 'BGMI', isFree: false });
   const { add, loading } = useFirestoreAdd('scrims');
 
   const handleSubmit = async (e) => {
@@ -197,6 +201,16 @@ function AddScrimModal({ onClose }) {
                  {GAMES.map(g => <option key={g.id} value={g.name}>{g.name}</option>)}
               </select>
             </div>
+            <div className="flex items-center gap-2 pt-2">
+              <input 
+                type="checkbox" 
+                id="isFree" 
+                checked={form.isFree} 
+                onChange={e=>setForm({...form, isFree: e.target.checked})}
+                className="w-4 h-4 rounded border-white/10 bg-white/5 text-cyan-400 accent-cyan-400"
+              />
+              <label htmlFor="isFree" className="text-xs font-bold text-slate-300 uppercase tracking-widest cursor-pointer">This is a Free Scrim</label>
+            </div>
             <div className="flex gap-4 pt-4">
                <NeonButton type="button" variant="secondary" onClick={onClose} className="flex-1">Cancel</NeonButton>
                <NeonButton type="submit" disabled={loading} className="flex-1">Schedule</NeonButton>
@@ -208,7 +222,7 @@ function AddScrimModal({ onClose }) {
 }
 
 function EditScrimModal({ scrim, onClose }) {
-  const [form, setForm] = useState({ opponent: scrim.opponent, game: scrim.game });
+  const [form, setForm] = useState({ opponent: scrim.opponent, game: scrim.game, isFree: scrim.isFree || false });
   const { update, loading } = useFirestoreUpdate('scrims');
 
   const handleSubmit = async (e) => {
@@ -233,6 +247,16 @@ function EditScrimModal({ scrim, onClose }) {
               <select value={form.game} onChange={e=>setForm({...form, game: e.target.value})} className="w-full input-glass rounded-xl px-4 py-3 text-sm">
                  {GAMES.map(g => <option key={g.id} value={g.name}>{g.name}</option>)}
               </select>
+            </div>
+            <div className="flex items-center gap-2 pt-2">
+              <input 
+                type="checkbox" 
+                id="editIsFree" 
+                checked={form.isFree} 
+                onChange={e=>setForm({...form, isFree: e.target.checked})}
+                className="w-4 h-4 rounded border-white/10 bg-white/5 text-cyan-400 accent-cyan-400"
+              />
+              <label htmlFor="editIsFree" className="text-xs font-bold text-slate-300 uppercase tracking-widest cursor-pointer">This is a Free Scrim</label>
             </div>
             <div className="flex gap-4 pt-4">
                <NeonButton type="button" variant="secondary" onClick={onClose} className="flex-1">Cancel</NeonButton>
@@ -351,10 +375,10 @@ function EndScrimModal({ scrim, onClose }) {
   };
 
   const handleEnd = async () => {
-    if (!file) return toast.error("Winnings screenshot is compulsory to end the scrim.");
+    if (!file && !scrim.isFree) return toast.error("Winnings screenshot is compulsory to end the scrim.");
     setUploading(true);
     try {
-      const base64Url = await compressToBase64(file);
+      const base64Url = file ? await compressToBase64(file) : null;
       await update(scrim.id, { 
          winningsProofUrl: base64Url, 
          status: 'completed', 
