@@ -212,23 +212,33 @@ export const TEMPLATES = {
  * Downloads the certificate natively as an image instead of a PDF!
  * This enables raw image sharing on social media effortlessly.
  */
+/**
+ * Downloads the certificate natively as an image.
+ * Now equipped with an intrusive Alert to catch the exact error!
+ */
 export const exportCertificateAsPDF = async (nodeId, certId) => {
-    const node = document.getElementById(nodeId);
-    if (!node) throw new Error("Preview element not found");
-    
-    // Scale 2 for high definition exports
-    const canvas = await html2canvas(node, {
-        scale: 2, 
-        useCORS: true, 
-        backgroundColor: null
-    });
-    
-    // Download directly as a high quality PNG IMAGE
-    const imgData = canvas.toDataURL('image/png', 1.0);
-    const link = document.createElement('a');
-    link.download = certId + '.png';
-    link.href = imgData;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    try {
+        const node = document.getElementById(nodeId);
+        if (!node) throw new Error("Preview element not found");
+        
+        // Scale 2 for high definition exports
+        const canvas = await html2canvas(node, {
+            scale: 2, 
+            useCORS: true, 
+            backgroundColor: null
+        });
+        
+        // Download directly as a high quality PNG IMAGE
+        const imgData = canvas.toDataURL('image/png', 1.0);
+        const link = document.createElement('a');
+        link.download = certId + '.png';
+        link.href = imgData;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    } catch (err) {
+        // FORCE THE ERROR TO SHOW UP ON SCREEN!
+        alert("CRASH LOG DETECTED:\n\n" + err.message + "\n\n" + (err.stack || 'No stack trace'));
+        throw err; // let the toast still catch it
+    }
 };
