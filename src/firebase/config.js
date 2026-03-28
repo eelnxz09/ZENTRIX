@@ -4,12 +4,12 @@ import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 
 const firebaseConfig = {
-  apiKey:            import.meta.env.VITE_FIREBASE_API_KEY || 'mock-key',
-  authDomain:        import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || 'mock-domain',
-  projectId:         import.meta.env.VITE_FIREBASE_PROJECT_ID || 'mock-project',
-  storageBucket:     import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || 'mock-bucket',
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || '1234',
-  appId:             import.meta.env.VITE_FIREBASE_APP_ID || '1:123',
+  apiKey: "AIzaSyAufqAXmRXZjc81aR6jTZlMbmss96RysF8",
+  authDomain: "zentrix-e5a7c.firebaseapp.com",
+  projectId: "zentrix-e5a7c",
+  storageBucket: "zentrix-e5a7c.firebasestorage.app",
+  messagingSenderId: "878573994076",
+  appId: "1:878573994076:web:5201433780cc84de232699"
 };
 
 // If no real key is provided, we will initialize a real app but it will fail.
