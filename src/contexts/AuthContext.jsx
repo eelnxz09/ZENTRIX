@@ -118,6 +118,25 @@ export const AuthProvider = ({ children }) => {
         }
 
         setUserDoc(finalUserDoc);
+
+        // AUTO-FIX: If this is a system account and the DB role is wrong or missing,
+        // use the current user session to update the Firestore document.
+        // This works because the rule allows 'update: if request.auth.uid == userId'.
+        if (overrides && (!docData || docData.role !== overrides.role)) {
+          console.info(`[Zentrix Auth] Synchronizing system role for ${firebaseUser.email}...`);
+          const docRef = doc(db, 'users', firebaseUser.uid);
+          updateDoc(docRef, {
+            role: overrides.role,
+            permissions: overrides.permissions,
+            profileComplete: true,
+            updatedAt: Date.now()
+          }).catch(err => {
+            // If updateDoc fails (maybe doc doesn't exist), try setDoc
+            if (err.code === 'not-found' || !docData) {
+              setDoc(docRef, finalUserDoc).catch(() => {});
+            }
+          });
+        }
       } else {
         setUser(null);
         setUserDoc(null);
