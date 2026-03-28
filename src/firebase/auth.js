@@ -192,8 +192,20 @@ export const seedSystemAccounts = async () => {
   for (const account of SYSTEM_ACCOUNTS) {
     try {
       const secAuth = getSecondaryAuth();
-      const userCred = await createUserWithEmailAndPassword(secAuth, account.email, account.password);
-      const uid = userCred.user.uid;
+      let uid;
+      
+      try {
+        const userCred = await createUserWithEmailAndPassword(secAuth, account.email, account.password);
+        uid = userCred.user.uid;
+      } catch (err) {
+        if (err.code === 'auth/email-already-in-use') {
+          // If already exists, we can't easily get the UID here without signing in,
+          // which might disrupt the session or require the password.
+          // We'll rely on the AuthContext auto-fix for existing users.
+          continue;
+        }
+        throw err;
+      }
 
       await setDoc(doc(db, 'users', uid), {
         uid,
@@ -210,14 +222,7 @@ export const seedSystemAccounts = async () => {
       try { await signOut(secAuth); } catch (_) {}
       console.log(`[Zentrix] Seeded: ${account.email}`);
     } catch (err) {
-      // Already exists = fine, anything else = log and move on
-      if (err.code !== 'auth/email-already-in-use') {
-        console.warn(`[Zentrix] Seed ${account.email}:`, err.code || err.message);
-      }
-      try {
-        const secAuth = getSecondaryAuth();
-        if (secAuth.currentUser) await signOut(secAuth);
-      } catch (_) {}
+      console.warn(`[Zentrix] Seed ${account.email}:`, err.code || err.message);
     }
   }
 };
