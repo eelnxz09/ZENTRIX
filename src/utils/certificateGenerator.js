@@ -207,6 +207,29 @@ export const TEMPLATES = {
 export const exportCertificateAsPDF = async (nodeId, certId) => {
     const node = document.getElementById(nodeId);
     if (!node) throw new Error("Preview element not found");
+    
+    // HOTFIX FOR GITHUB PAGES CORS CRASH:
+    const imgs = node.getElementsByTagName('img');
+    for (let i = 0; i < imgs.length; i++) {
+        const img = imgs[i];
+        if (img.src && !img.src.startsWith('data:')) {
+            try {
+                const res = await fetch(img.src);
+                const blob = await res.blob();
+                const reader = new FileReader();
+                await new Promise(resolve => {
+                    reader.onloadend = () => {
+                        img.src = reader.result;
+                        resolve();
+                    };
+                    reader.readAsDataURL(blob);
+                });
+            } catch (err) {
+                console.error("CORS bypass failed for image: ", err);
+            }
+        }
+    }
+
     const canvas = await html2canvas(node, {
         scale: 2, 
         useCORS: true, 
