@@ -85,6 +85,11 @@ export default function RolesPage() {
   };
 
   const handleChangeRole = async (userId, newRole) => {
+    if (!userId) {
+      toast.error('Internal Error: Missing User ID');
+      return;
+    }
+
     try {
       await updateDoc(doc(db, 'users', userId), {
         role: newRole,
@@ -93,8 +98,9 @@ export default function RolesPage() {
       });
       toast.success(`Role updated to ${ROLE_LABELS[newRole] || newRole}`);
     } catch (err) {
-      console.error('Failed to update role:', err);
-      toast.error('Failed to update role');
+      console.error('Failed to update role for ID:', userId, err);
+      // Show exact Firebase error message for better debugging
+      toast.error(err.message || 'Failed to update role');
     }
   };
 
