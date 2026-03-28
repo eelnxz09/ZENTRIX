@@ -23,9 +23,8 @@ export default function Certificates() {
     toast.loading('Synthesizing Award Graphics...', { id: 'cert' });
     try {
         const certId = 'ZX-CERT-' + Date.now().toString().slice(-6);
-        // The DOM node must be rendered in the document for html2canvas to work.
-        // We will pass the ID of our live preview hidden container, or just the preview panel
-        await exportCertificateAsPDF('certificate-live-preview', certId);
+        // Pass template key + form data so it re-renders with the real base64 logo
+        await exportCertificateAsPDF(form.template, form, certId);
         toast.success(`Certificate ${certId} Exported!`, { id: 'cert' });
     } catch(err) {
         toast.error('Failed to generate certificate', { id: 'cert' });
