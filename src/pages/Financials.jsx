@@ -3,14 +3,16 @@ import { GlassCard } from '../components/ui/GlassCard';
 import { NeonButton } from '../components/ui/NeonButton';
 import { PermissionGuard } from '../components/ui/PermissionGuard';
 import { useAuth } from '../hooks/useAuth';
-import { useCollection, useFirestoreAdd } from '../hooks/useFirestore';
+import { useCollection, useFirestoreAdd, useFirestoreDelete } from '../hooks/useFirestore';
 import { useAuditLog } from '../hooks/useAuditLog';
 import { uploadFile } from '../firebase/storage';
-import { Download, Filter, AlertTriangle, Shield, Plus, CloudUpload, CheckCircle, MoreVertical } from 'lucide-react';
+import { Download, Filter, AlertTriangle, Shield, Plus, CloudUpload, CheckCircle, MoreVertical, Trash2 } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, ResponsiveContainer, Tooltip } from 'recharts';
 import toast from 'react-hot-toast';
 
 export default function Financials() {
+  const { user } = useAuth();
+  const { remove } = useFirestoreDelete('financial_logs');
   const { data: logs, loading } = useCollection('financial_logs', [], 'createdAt');
   const { data: players } = useCollection('players');
   const { data: tournaments } = useCollection('tournaments');
@@ -220,8 +222,21 @@ export default function Financials() {
                         <span className="text-[10px] text-slate-600 uppercase font-bold tracking-widest">System</span>
                       )}
                     </td>
-                    <td className="px-6 py-5">
-                      {isFlagged ? (
+                    <td className="px-6 py-5 text-right">
+                      {user?.role === 'owner' ? (
+                        <button 
+                          onClick={() => {
+                            if(window.confirm('WARNING: Permanently delete this transaction record?')) {
+                              remove(log.id);
+                              toast.success('Transaction Erased');
+                            }
+                          }}
+                          title="Delete Transaction"
+                          className="p-1.5 bg-pink-500/10 border border-pink-500/30 rounded hover:bg-pink-500/20 transition-colors inline-block"
+                        >
+                          <Trash2 size={14} className="text-pink-500" />
+                        </button>
+                      ) : isFlagged ? (
                         <button className="px-2 py-1 bg-pink-500/20 border border-pink-500/40 text-[9px] font-black uppercase tracking-widest text-pink-400 rounded hover:bg-pink-500/30 transition-colors">Notify</button>
                       ) : (
                         <MoreVertical size={16} className="text-slate-500 cursor-pointer hover:text-white transition-colors" />
