@@ -85,11 +85,6 @@ export default function RolesPage() {
   };
 
   const handleChangeRole = async (userId, newRole) => {
-    if (!userId) {
-      toast.error('Internal Error: Missing User ID');
-      return;
-    }
-
     try {
       await updateDoc(doc(db, 'users', userId), {
         role: newRole,
@@ -98,9 +93,8 @@ export default function RolesPage() {
       });
       toast.success(`Role updated to ${ROLE_LABELS[newRole] || newRole}`);
     } catch (err) {
-      console.error('Failed to update role for ID:', userId, err);
-      // Show exact Firebase error message for better debugging
-      toast.error(err.message || 'Failed to update role');
+      console.error('Failed to update role:', err);
+      toast.error('Failed to update role');
     }
   };
 
@@ -224,7 +218,6 @@ export default function RolesPage() {
                       <span className={`px-2 py-0.5 text-[9px] font-black uppercase tracking-widest rounded ${
                         u.role === 'manager' ? 'bg-cyan-400/10 text-cyan-400' : 
                         u.role === 'game_team_manager' ? 'bg-purple-400/10 text-purple-400' :
-                        u.role === 'coach' ? 'bg-orange-400/10 text-orange-400' :
                         'bg-slate-400/10 text-slate-400'
                       }`}>{ROLE_LABELS[u.role] || u.role}</span>
                     </td>
@@ -236,8 +229,8 @@ export default function RolesPage() {
                         className="input-glass rounded-lg px-3 py-1.5 text-xs"
                       >
                         <option value="player">Player</option>
-                        <option value="game_team_manager">Team Manager</option>
                         <option value="coach">Team Coach</option>
+                        <option value="game_team_manager">Team Manager</option>
                         <option value="manager">Esports Manager</option>
                       </select>
                     </td>
