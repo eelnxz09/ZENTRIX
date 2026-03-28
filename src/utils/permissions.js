@@ -72,6 +72,7 @@ export const ROLES = {
   OWNER:             'owner',
   MANAGER:           'manager',
   GAME_TEAM_MANAGER: 'game_team_manager',
+  COACH:             'coach',
   PLAYER:            'player',
 };
 
@@ -79,6 +80,7 @@ export const ROLE_LABELS = {
   [ROLES.OWNER]:             'Owner',
   [ROLES.MANAGER]:           'Esports Manager',
   [ROLES.GAME_TEAM_MANAGER]: 'Team Manager',
+  [ROLES.COACH]:             'Team Coach',
   [ROLES.PLAYER]:            'Player',
 };
 
@@ -137,6 +139,22 @@ export const ROLE_DEFAULTS = {
     PERMISSIONS.VIEW_CERTIFICATES,
     PERMISSIONS.GENERATE_CERTIFICATES,
     PERMISSIONS.VIEW_SETTINGS,
+  ],
+
+  [ROLES.COACH]: [
+    // Performance focus — View/Edit players & teams + Full Scrims
+    PERMISSIONS.VIEW_PLAYERS,
+    PERMISSIONS.EDIT_PLAYERS,
+    PERMISSIONS.VIEW_TEAMS,
+    PERMISSIONS.EDIT_TEAMS,
+    PERMISSIONS.VIEW_TOURNAMENTS,
+    PERMISSIONS.EDIT_TOURNAMENTS,
+    PERMISSIONS.VIEW_SCRIMS,
+    PERMISSIONS.MANAGE_SCRIMS,
+    PERMISSIONS.VIEW_ANALYTICS,
+    PERMISSIONS.VIEW_CERTIFICATES,
+    PERMISSIONS.VIEW_SETTINGS,
+    PERMISSIONS.VIEW_NOTIFICATIONS,
   ],
 
   [ROLES.PLAYER]: [
