@@ -31,28 +31,51 @@ export default function Profile() {
   const [photoFile, setPhotoFile] = useState(null);
   const [photoPreview, setPhotoPreview] = useState(userDoc?.photoURL || '');
 
+  // SYNC: Ensure form is populated when userDoc loads or changes while NOT editing
+  React.useEffect(() => {
+    if (userDoc && !editing) {
+      setForm({
+        displayName: userDoc.displayName || '',
+        ign: userDoc.ign || '',
+        phone: userDoc.phone || '',
+        bio: userDoc.bio || '',
+        socialLinks: userDoc.socialLinks || { instagram: '', twitter: '', youtube: '', discord: '' },
+      });
+      setPhotoPreview(userDoc.photoURL || '');
+    }
+  }, [userDoc, editing]);
+
   const updateField = (field, value) => setForm(prev => ({ ...prev, [field]: value }));
   const updateSocial = (platform, value) => {
     setForm(prev => ({ ...prev, socialLinks: { ...prev.socialLinks, [platform]: value } }));
   };
 
   const handleSave = async () => {
+    if (!user?.uid) return;
     setSaving(true);
     try {
       let photoURL = userDoc?.photoURL || '';
+      
+      // If a new file was selected, upload it first
       if (photoFile) {
         const path = getStoragePath('avatar', photoFile.name);
         photoURL = await uploadFile(photoFile, path);
       }
 
+      // Update Firestore
       await updateDocument('users', user.uid, {
         ...form,
         photoURL,
+        // Ensure profile is marked as complete if it wasn't already
+        profileComplete: true,
+        updatedAt: Date.now()
       });
 
       toast.success('Profile updated successfully');
       setEditing(false);
+      setPhotoFile(null); // Reset file selection
     } catch (err) {
+      console.error('[Profile] Save error:', err);
       toast.error('Failed to update profile');
     } finally {
       setSaving(false);
