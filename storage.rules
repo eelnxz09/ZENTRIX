@@ -1,0 +1,52 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    
+    // Only authenticated users can access storage
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // ━━━ AVATARS ━━━
+    match /avatars/{fileName} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && request.resource.size < 5 * 1024 * 1024; // 5MB
+    }
+
+    // ━━━ PAYMENT PROOFS ━━━
+    match /payment_proofs/{fileName} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && request.resource.size < 10 * 1024 * 1024; // 10MB
+    }
+
+    // ━━━ TOURNAMENT PROOFS ━━━
+    match /tournament_proofs/{fileName} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && request.resource.size < 10 * 1024 * 1024;
+    }
+
+    // ━━━ SCRIM PROOFS ━━━
+    match /scrim_proofs/{fileName} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && request.resource.size < 10 * 1024 * 1024;
+    }
+
+    // ━━━ CERTIFICATES ━━━
+    match /certificates/{fileName} {
+      allow read;  // Public access for certificate verification
+      allow write: if isAuthenticated() && request.resource.size < 10 * 1024 * 1024;
+    }
+
+    // ━━━ TEAM LOGOS ━━━
+    match /team_logos/{fileName} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && request.resource.size < 5 * 1024 * 1024;
+    }
+
+    // ━━━ GENERAL UPLOADS ━━━
+    match /uploads/{fileName} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && request.resource.size < 10 * 1024 * 1024;
+    }
+  }
+}

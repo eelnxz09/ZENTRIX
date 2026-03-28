@@ -1,0 +1,66 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    background-color: #050510;
+    color: rgba(255,255,255,0.95);
+  }
+
+  /* Fix for dropdown options being invisible on some OS/Browsers */
+  select option {
+    background-color: #050510; 
+    color: #00F5FF;
+    font-weight: 700;
+  }
+}
+
+@layer components {
+  .glass-card {
+    background: rgba(255,255,255,0.04);
+    backdrop-filter: blur(24px);
+    border: 1px solid rgba(255,255,255,0.08);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  }
+
+  .elevated-card {
+    background: rgba(255,255,255,0.06);
+    backdrop-filter: blur(32px);
+    border: 1px solid rgba(255,255,255,0.12);
+    box-shadow: 0 16px 64px rgba(0,0,0,0.6);
+  }
+
+  .top-layer {
+    background: rgba(10,10,26,0.95);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(0,245,255,0.2);
+    box-shadow: var(--glow-cyan), 0 4px 16px rgba(0,0,0,0.4);
+  }
+
+  .input-glass {
+    background: rgba(255,255,255,0.04);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: white;
+  }
+  
+  .input-glass:focus {
+    outline: none;
+    border-color: #00F5FF;
+    box-shadow: 0 0 15px rgba(0, 245, 255, 0.3);
+    background: rgba(255,255,255,0.06);
+  }
+
+  .text-glow-cyan {
+    text-shadow: 0 0 10px rgba(0,245,255,0.6);
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}

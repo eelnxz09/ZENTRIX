@@ -1,0 +1,127 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ━━━ HELPER FUNCTIONS ━━━
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function isOwner() {
+      return isAuthenticated() && getUserData().role == 'owner';
+    }
+
+    function isManager() {
+      return isAuthenticated() && getUserData().role == 'manager';
+    }
+
+    function isOwnerOrManager() {
+      return isOwner() || isManager();
+    }
+
+    // ━━━ USERS COLLECTION ━━━
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow create: if isOwnerOrManager();
+      allow update: if isOwnerOrManager() || request.auth.uid == userId;
+      allow delete: if isOwner();
+    }
+
+    // ━━━ TEAMS COLLECTION ━━━
+    match /teams/{teamId} {
+      allow read: if isAuthenticated();
+      allow create, update: if isOwnerOrManager() || 
+        (isAuthenticated() && getUserData().role == 'game_team_manager');
+      allow delete: if isOwnerOrManager();
+    }
+
+    // ━━━ PLAYERS COLLECTION ━━━
+    match /players/{playerId} {
+      allow read: if isAuthenticated();
+      allow create, update: if isOwnerOrManager() || 
+        (isAuthenticated() && getUserData().role == 'game_team_manager');
+      allow delete: if isOwnerOrManager();
+    }
+
+    // ━━━ TOURNAMENTS COLLECTION ━━━
+    match /tournaments/{tournamentId} {
+      allow read: if isAuthenticated();
+      allow create, update: if isOwnerOrManager();
+      allow delete: if isOwner();
+    }
+
+    // ━━━ SCRIMS COLLECTION ━━━
+    match /scrims/{scrimId} {
+      allow read: if isAuthenticated();
+      allow create, update: if isOwnerOrManager() || 
+        (isAuthenticated() && getUserData().role == 'game_team_manager');
+      allow delete: if isOwnerOrManager();
+    }
+
+    // ━━━ FINANCIAL LOGS — IMMUTABLE (NO DELETE, NO DIRECT EDIT) ━━━
+    match /financial_logs/{logId} {
+      allow read: if isAuthenticated() && (isOwnerOrManager());
+      allow create: if isOwnerOrManager();
+      // Only allow updates to mark as amended (limited fields)
+      allow update: if isOwner() && 
+        request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['isAmended', 'amendedAt', 'amendedBy', 'updatedAt']);
+      // NEVER delete financial logs
+      allow delete: if false;
+    }
+
+    // ━━━ AUDIT LOGS — COMPLETELY IMMUTABLE ━━━
+    match /audit_logs/{logId} {
+      allow read: if isAuthenticated() && isOwner();
+      allow create: if isAuthenticated();
+      allow update: if false;  // Never edit
+      allow delete: if false;  // Never delete
+    }
+
+    // ━━━ CERTIFICATES COLLECTION ━━━
+    match /certificates/{certId} {
+      allow read: if isAuthenticated();
+      allow create: if isOwnerOrManager() || 
+        (isAuthenticated() && getUserData().role == 'game_team_manager');
+      allow update: if isOwnerOrManager();
+      allow delete: if isOwner();
+    }
+
+    // ━━━ ROLES COLLECTION ━━━
+    match /roles/{roleId} {
+      allow read: if isAuthenticated();
+      allow create, update: if isOwnerOrManager();
+      allow delete: if isOwner();
+    }
+
+    // ━━━ NOTIFICATIONS COLLECTION ━━━
+    match /notifications/{notifId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated() && request.auth.uid == resource.data.userId;
+      allow delete: if isOwnerOrManager();
+    }
+
+    // ━━━ ANNOUNCEMENTS COLLECTION ━━━
+    match /announcements/{annId} {
+      allow read: if isAuthenticated();
+      allow create, update: if isOwnerOrManager();
+      allow delete: if isOwner();
+    }
+
+    // ━━━ INVITES (legacy — kept for reference) ━━━
+    match /invites/{inviteId} {
+      allow read, write: if isOwnerOrManager();
+    }
+
+    // ━━━ DEMO/SEED DATA ━━━
+    match /audit_demo/{docId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated();
+    }
+  }
+}
