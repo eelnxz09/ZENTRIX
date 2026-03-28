@@ -19,6 +19,10 @@ service cloud.firestore {
       return isAuthenticated() && getUserData().role == 'manager';
     }
 
+    function isCoach() {
+      return isAuthenticated() && getUserData().role == 'coach';
+    }
+
     function isOwnerOrManager() {
       return isOwner() || isManager();
     }
@@ -35,7 +39,7 @@ service cloud.firestore {
     match /teams/{teamId} {
       allow read: if isAuthenticated();
       allow create, update: if isOwnerOrManager() || 
-        (isAuthenticated() && getUserData().role == 'game_team_manager');
+        (isAuthenticated() && (getUserData().role == 'game_team_manager' || getUserData().role == 'coach'));
       allow delete: if isOwnerOrManager();
     }
 
@@ -43,7 +47,7 @@ service cloud.firestore {
     match /players/{playerId} {
       allow read: if isAuthenticated();
       allow create, update: if isOwnerOrManager() || 
-        (isAuthenticated() && getUserData().role == 'game_team_manager');
+        (isAuthenticated() && (getUserData().role == 'game_team_manager' || getUserData().role == 'coach'));
       allow delete: if isOwnerOrManager();
     }
 
@@ -58,7 +62,7 @@ service cloud.firestore {
     match /scrims/{scrimId} {
       allow read: if isAuthenticated();
       allow create, update: if isOwnerOrManager() || 
-        (isAuthenticated() && getUserData().role == 'game_team_manager');
+        (isAuthenticated() && (getUserData().role == 'game_team_manager' || getUserData().role == 'coach'));
       allow delete: if isOwnerOrManager();
     }
 
@@ -86,7 +90,7 @@ service cloud.firestore {
     match /certificates/{certId} {
       allow read: if isAuthenticated();
       allow create: if isOwnerOrManager() || 
-        (isAuthenticated() && getUserData().role == 'game_team_manager');
+        (isAuthenticated() && (getUserData().role == 'game_team_manager' || getUserData().role == 'coach'));
       allow update: if isOwnerOrManager();
       allow delete: if isOwner();
     }
