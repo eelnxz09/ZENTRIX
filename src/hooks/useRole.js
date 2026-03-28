@@ -14,6 +14,7 @@ export function useRole() {
   const isOwner = () => userDoc?.role === ROLES.OWNER;
   const isManager = () => userDoc?.role === ROLES.MANAGER;
   const isGameTeamManager = () => userDoc?.role === ROLES.GAME_TEAM_MANAGER;
+  const isCoach = () => userDoc?.role === ROLES.COACH;
   const isPlayer = () => userDoc?.role === ROLES.PLAYER;
 
   // Convenience: Owner OR Manager (both have broad system access)
@@ -31,6 +32,7 @@ export function useRole() {
     isOwner,
     isManager,
     isGameTeamManager,
+    isCoach,
     isPlayer,
     isOwnerOrManager,
     canCreateUsers,
