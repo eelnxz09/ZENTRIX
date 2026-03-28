@@ -23,14 +23,16 @@ export default function Players() {
   const { update } = useFirestoreUpdate('players');
 
   const players = React.useMemo(() => {
-    if (userDoc?.role === ROLES.GAME_TEAM_MANAGER && userDoc?.game) {
+    const role = userDoc?.role;
+    if ((role === ROLES.GAME_TEAM_MANAGER || role === ROLES.COACH) && userDoc?.game) {
       return allPlayers.filter(p => p.game === userDoc.game);
     }
     return allPlayers;
   }, [allPlayers, userDoc]);
 
   const teams = React.useMemo(() => {
-    if (userDoc?.role === ROLES.GAME_TEAM_MANAGER && userDoc?.game) {
+    const role = userDoc?.role;
+    if ((role === ROLES.GAME_TEAM_MANAGER || role === ROLES.COACH) && userDoc?.game) {
       return allTeams.filter(t => t.game === userDoc.game);
     }
     return allTeams;
@@ -422,7 +424,17 @@ function TerminateButton({ player, onClose }) {
 }
 
 function EditPlayerModal({ player, onClose, update }) {
-  const [form, setForm] = useState({ ign: player.ign, game: player.game, role: player.role, salary: player.salary || 0 });
+  const [form, setForm] = useState({ 
+    ign: player.ign, 
+    game: player.game, 
+    role: player.role, 
+    salary: player.salary || 0,
+    stats: {
+      kd: player.stats?.kd || 0,
+      accuracy: player.stats?.accuracy || 0,
+      clutchRate: player.stats?.clutchRate || 0
+    }
+  });
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
@@ -431,7 +443,7 @@ function EditPlayerModal({ player, onClose, update }) {
     setLoading(true);
     try {
       await update(player.id, form);
-      toast.success('Player Info Updated!');
+      toast.success('Player Info & Analytics Updated!');
       onClose();
     } catch { toast.error('Update failed'); } finally { setLoading(false); }
   };
@@ -459,6 +471,25 @@ function EditPlayerModal({ player, onClose, update }) {
               <label className="text-[10px] font-bold text-green-400 uppercase tracking-widest block mb-1">Team Salary (₹)</label>
               <input type="number" value={form.salary} onChange={e=>setForm({...form, salary: Number(e.target.value)})} className="w-full input-glass rounded-xl px-4 py-3 text-sm" placeholder="Ex: 5000" />
             </div>
+
+            <div className="h-px bg-white/5 my-2" />
+            <h3 className="text-[10px] font-bold text-cyan-400 uppercase tracking-widest mb-2">Combat Analytics</h3>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1">K/D Ratio</label>
+                <input type="number" step="0.01" value={form.stats.kd} onChange={e=>setForm({...form, stats: {...form.stats, kd: Number(e.target.value)}})} className="w-full input-glass rounded-xl px-4 py-3 text-sm" />
+              </div>
+              <div>
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1">Accuracy %</label>
+                <input type="number" value={form.stats.accuracy} onChange={e=>setForm({...form, stats: {...form.stats, accuracy: Number(e.target.value)}})} className="w-full input-glass rounded-xl px-4 py-3 text-sm" />
+              </div>
+            </div>
+            <div>
+              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1">Clutch Rate %</label>
+              <input type="number" value={form.stats.clutchRate} onChange={e=>setForm({...form, stats: {...form.stats, clutchRate: Number(e.target.value)}})} className="w-full input-glass rounded-xl px-4 py-3 text-sm" />
+            </div>
+
             <div className="flex gap-4 pt-4">
                <NeonButton type="button" variant="secondary" onClick={onClose} className="flex-1">Cancel</NeonButton>
                <NeonButton type="submit" disabled={loading} className="flex-1">Save Changes</NeonButton>
