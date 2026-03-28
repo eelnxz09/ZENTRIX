@@ -51,6 +51,7 @@ export const PERMISSIONS = {
   // Settings
   VIEW_SETTINGS:          'view_settings',
   EDIT_SETTINGS:          'edit_settings',
+  VIEW_NOTIFICATIONS:     'view_notifications',
 };
 
 // ━━━ HARDCODED CREDENTIAL MAP ━━━
@@ -174,7 +175,8 @@ export function hasPermission(userPermissions, permission) {
 }
 
 export function getDefaultPermissions(role) {
-  return ROLE_DEFAULTS[role] || ROLE_DEFAULTS[ROLES.PLAYER];
+  const perms = ROLE_DEFAULTS[role] || ROLE_DEFAULTS[ROLES.PLAYER];
+  return perms.filter(p => p !== undefined);
 }
 
 export function getRoleForEmail(email) {
