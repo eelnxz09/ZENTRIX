@@ -10,7 +10,7 @@ export const CredentialDisplay = ({ credentials, onDone }) => {
 
   if (!credentials) return null;
 
-  const credText = `Zentrix Esports — Login Credentials\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nName: ${credentials.displayName}\nRole: ${getRoleLabel(credentials.role)}\nEmail: ${credentials.email}\nPassword: ${credentials.password}\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nLogin at: zentrixesports.com`;
+  const credText = `🎮 Zentrix Esports — Login Credentials\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nName: ${credentials.displayName}\nRole: ${getRoleLabel(credentials.role)}\nEmail: ${credentials.email}\nPassword: ${credentials.password}\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n🔗 Login here: https://eelnxz09.github.io/ZENTRIX/\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nPowered by Zentrix Esports India`;
 
   const handleCopy = async () => {
     try {
