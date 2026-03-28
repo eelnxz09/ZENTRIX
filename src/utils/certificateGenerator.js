@@ -1,62 +1,20 @@
 import html2canvas from 'html2canvas';
-import zkLogoUrl from '../assets/zk-logo.png';
+import LOGO_BASE64 from './zkLogoBase64.js';
 
 /**
- * Pre-loads the ZK logo and converts it to a base64 data URL.
- * This completely eliminates CORS / 404 issues with html2canvas.
+ * Returns an <img> tag with the embedded base64 logo.
+ * The logo is baked directly into the JS bundle — no network requests needed.
  */
-let cachedLogoDataUrl = null;
-
-async function getLogoDataUrl() {
-  if (cachedLogoDataUrl) return cachedLogoDataUrl;
-  
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.onload = () => {
-      try {
-        const canvas = document.createElement('canvas');
-        canvas.width = img.naturalWidth;
-        canvas.height = img.naturalHeight;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0);
-        cachedLogoDataUrl = canvas.toDataURL('image/png');
-        resolve(cachedLogoDataUrl);
-      } catch (e) {
-        // If canvas is tainted, fall back to the CSS logo
-        console.warn('Logo canvas tainted, using CSS fallback');
-        resolve(null);
-      }
-    };
-    img.onerror = () => {
-      console.warn('Logo failed to load, using CSS fallback');
-      resolve(null);
-    };
-    img.src = zkLogoUrl;
-  });
+function logoHtml(size = 150) {
+  return `<img src="${LOGO_BASE64}" style="width:${size}px;height:${size}px;object-fit:contain;" />`;
 }
 
-/**
- * Returns either an <img> tag with the base64 logo, or a CSS fallback badge.
- */
-function logoHtml(logoDataUrl, size = 150) {
-  if (logoDataUrl) {
-    return `<img src="${logoDataUrl}" style="width:${size}px;height:${size}px;object-fit:contain;" />`;
-  }
-  // Pure CSS fallback
-  return `
-    <div style="width:${size}px;height:${size}px;display:inline-flex;align-items:center;justify-content:center;background:linear-gradient(135deg, #FF2D78, #FF4655);box-shadow:0 0 30px rgba(255,45,120,0.6);border-radius:24px;transform:rotate(-10deg);border:4px solid #FFF;">
-        <span style="font-family:'Orbitron',monospace;color:#FFF;font-size:${Math.round(size*0.43)}px;font-weight:900;letter-spacing:-6px;font-style:italic;">ZK</span>
-    </div>`;
-}
-
-// Template generators - each receives data + the pre-loaded logo HTML string
-function makeTemplates(logo) {
-  return {
+// Template generators - logoHtml is used directly (always has the real logo)
+export const TEMPLATES = {
     winner: (data) => `
       <div style="width:1920px;height:1080px;background:#05050A;color:white;display:flex;flex-direction:column;justify-content:center;align-items:center;border:15px solid #E63946;font-family:'Space Grotesk',sans-serif;box-sizing:border-box;position:relative;overflow:hidden;">
           <div style="position:absolute;top:0;left:0;width:100%;height:100%;background:radial-gradient(circle at top right, rgba(230,57,70,0.15), transparent 50%);pointer-events:none;"></div>
-          ${logo(180)}
+          ${logoHtml(180)}
           <h1 style="font-family:'Orbitron',monospace;color:#E63946;font-size:60px;letter-spacing:10px;margin-bottom:10px;text-align:center;">ZENTRIX ESPORTS INDIA</h1>
           <h2 style="font-size:45px;color:#fff;margin-bottom:40px;letter-spacing:5px;font-weight:900;">CHAMPIONSHIP AWARD</h2>
           <div style="width:800px;height:2px;background:linear-gradient(90deg, transparent, #E63946, transparent);margin-bottom:40px;"></div>
@@ -73,7 +31,7 @@ function makeTemplates(logo) {
     mvp: (data) => `
       <div style="width:1920px;height:1080px;background:linear-gradient(135deg, #FFB703 0%, #FB8500 50%, #023047 50%, #000000 100%);color:black;display:flex;flex-direction:row;align-items:center;font-family:'Outfit',sans-serif;box-sizing:border-box;position:relative;overflow:hidden;border:10px solid #FB8500;">
           <div style="width:40%;height:100%;padding:100px;display:flex;flex-direction:column;justify-content:center;position:relative;z-index:2;">
-              ${logo(150)}
+              ${logoHtml(150)}
               <h1 style="color:#000;font-size:55px;font-weight:900;letter-spacing:4px;line-height:1.1;margin-bottom:20px;text-transform:uppercase;">ZENTRIX ESPORTS<br/>INDIA</h1>
               <h2 style="font-size:90px;color:#000;font-weight:900;letter-spacing:2px;line-height:1;margin-bottom:0;">M.V.P</h2>
               <h3 style="font-size:35px;color:#fff;background:#000;display:inline-block;padding:10px 20px;margin-top:20px;">MOST VALUABLE PLAYER</h3>
@@ -100,7 +58,7 @@ function makeTemplates(logo) {
               <p style="font-size:14px;color:#444;letter-spacing:2px;font-family:'Orbitron',monospace;">UID: ${data.certId || '000000'}</p>
           </div>
           <div style="display:flex;align-items:center;gap:30px;margin-bottom:60px;z-index:2;">
-              ${logo(100)}
+              ${logoHtml(100)}
               <div>
                  <h1 style="font-family:'Orbitron',monospace;color:#F012BE;font-size:40px;letter-spacing:8px;margin:0;">ZENTRIX ESPORTS INDIA</h1>
                  <p style="color:#00E5FF;font-size:18px;letter-spacing:10px;margin:5px 0 0 0;font-weight:700;">DIGITAL CERTIFICATE OF ELITE PERFORMANCE</p>
@@ -126,7 +84,7 @@ function makeTemplates(logo) {
           <div style="position:absolute;top:0;left:0;width:300px;height:300px;background:#FF4655;clip-path:polygon(0 0, 100% 0, 0 100%);"></div>
           <div style="position:absolute;bottom:0;right:0;width:400px;height:400px;background:#111;clip-path:polygon(100% 100%, 100% 0, 0 100%);"></div>
           <div style="position:absolute;bottom:0;right:70px;width:300px;height:300px;background:#FF4655;clip-path:polygon(100% 100%, 100% 0, 0 100%);"></div>
-          ${logo(130)}
+          ${logoHtml(130)}
           <h1 style="font-family:'Orbitron',monospace;color:#FF4655;font-size:45px;letter-spacing:15px;margin-bottom:60px;font-weight:900;">ZENTRIX ESPORTS INDIA</h1>
           <div style="background:#ECE8E1;width:1000px;padding:60px 40px;text-align:center;box-shadow: 20px 20px 0px rgba(0,0,0,0.5);border:2px solid #333;">
               <p style="color:#FF4655;font-size:20px;font-weight:900;letter-spacing:8px;margin-bottom:20px;">CERTIFICATE OF ACHIEVEMENT</p>
@@ -144,7 +102,7 @@ function makeTemplates(logo) {
     participation: (data) => `
       <div style="width:1920px;height:1080px;background:#FAFAFA;color:#111;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'Outfit',sans-serif;position:relative;border:1px solid #E5E7EB;overflow:hidden;">
           <div style="position:absolute;top:0;left:0;width:100%;height:400px;background:linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);clip-path:polygon(0 0, 100% 0, 100% 100%, 0 80%);"></div>
-          <div style="z-index:2;">${logo(140)}</div>
+          <div style="z-index:2;">${logoHtml(140)}</div>
           <h1 style="color:#374151;font-size:40px;letter-spacing:10px;margin-bottom:10px;font-weight:900;z-index:2;text-align:center;">ZENTRIX ESPORTS INDIA</h1>
           <h2 style="font-size:60px;color:#111;margin-bottom:60px;font-weight:900;letter-spacing:4px;z-index:2;">CERTIFICATE OF PARTICIPATION</h2>
           <p style="font-size:26px;color:#6B7280;z-index:2;">This acknowledges that</p>
@@ -160,7 +118,7 @@ function makeTemplates(logo) {
     sharpshooter: (data) => `
       <div style="width:1920px;height:1080px;background:#0c0f12;color:white;display:flex;flex-direction:row;font-family:'Space Grotesk',sans-serif;border:10px solid #222;">
           <div style="width:30%;height:100%;border-right:1px solid #333;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px;background:radial-gradient(circle, #1a1f26 0%, #0c0f12 100%);">
-              ${logo(200)}
+              ${logoHtml(200)}
               <div style="width:100px;height:100px;border:4px solid #22c55e;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:20px 0;">
                   <div style="width:10px;height:10px;background:#22c55e;border-radius:50%;"></div>
               </div>
@@ -179,7 +137,7 @@ function makeTemplates(logo) {
 
     igl: (data) => `
       <div style="width:1920px;height:1080px;background:#050505;color:#EAB308;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'Outfit',sans-serif;position:relative;border:4px solid #EAB308;outline:20px solid #050505;outline-offset:-30px;">
-          ${logo(140)}
+          ${logoHtml(140)}
           <h1 style="color:#fff;font-size:30px;letter-spacing:10px;font-weight:700;margin-bottom:5px;">ZENTRIX ESPORTS INDIA</h1>
           <h2 style="color:#EAB308;font-size:60px;letter-spacing:6px;font-weight:900;margin-bottom:60px;font-family:'Orbitron',serif;">IGL EXCELLENCE AWARD</h2>
           <p style="color:#888;font-size:22px;letter-spacing:2px;">BESTOWED UPON LEADER:</p>
@@ -207,12 +165,12 @@ function makeTemplates(logo) {
               </div>
               <p style="font-size:20px;color:#bae6fd;margin-top:60px;font-weight:700;letter-spacing:4px;">ISSUED: ${data.date}</p>
           </div>
-          <div style="position:absolute;bottom:100px;right:100px;z-index:2;">${logo(250)}</div>
+          <div style="position:absolute;bottom:100px;right:100px;z-index:2;">${logoHtml(250)}</div>
       </div>`,
 
     clutch: (data) => `
       <div style="width:1920px;height:1080px;background:#180018;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'Space Grotesk',sans-serif;border:10px solid #d946ef;box-shadow:inset 0 0 100px rgba(217,70,239,0.3);">
-          ${logo(180)}
+          ${logoHtml(180)}
           <h1 style="color:#d946ef;font-size:28px;letter-spacing:15px;margin-bottom:40px;font-weight:900;">ZENTRIX ESPORTS INDIA</h1>
           <h2 style="font-family:'Orbitron',monospace;font-size:80px;color:#facc15;margin-bottom:10px;text-transform:uppercase;text-shadow:0 0 40px #facc15;">CLUTCH MASTER</h2>
           <p style="font-size:24px;color:#fdf4ff;">AGAINST ALL ODDS, VICTORY WAS SECURED BY</p>
@@ -226,7 +184,7 @@ function makeTemplates(logo) {
     honneur: (data) => `
       <div style="width:1920px;height:1080px;background:#E2E8F0;color:#0F172A;display:flex;flex-direction:row;align-items:center;font-family:'Outfit',sans-serif;position:relative;border:40px solid #F8FAFC;">
           <div style="width:50%;height:100%;padding:100px;display:flex;flex-direction:column;justify-content:center;border-right:1px solid #CBD5E1;">
-              ${logo(120)}
+              ${logoHtml(120)}
               <h1 style="font-size:20px;letter-spacing:10px;color:#475569;margin-bottom:20px;font-weight:900;">ZENTRIX ESPORTS INDIA</h1>
               <h2 style="font-size:75px;font-weight:900;line-height:1.1;color:#0F172A;margin-bottom:40px;">ESPORTS<br/>HONOR ROLL</h2>
               <p style="font-size:22px;color:#475569;line-height:1.6;">This prestigious documentation is awarded in recognition of outstanding athletic achievement in digital competition.</p>
@@ -243,46 +201,22 @@ function makeTemplates(logo) {
               </div>
           </div>
       </div>`
-  };
-}
-
-// Lazy-initialized templates with logo
-let _templates = null;
-let _logoFunc = null;
-
-async function ensureTemplates() {
-  if (_templates) return _templates;
-  const dataUrl = await getLogoDataUrl();
-  _logoFunc = (size) => logoHtml(dataUrl, size);
-  _templates = makeTemplates(_logoFunc);
-  return _templates;
-}
-
-// For the live preview (synchronous), use CSS fallback initially
-const fallbackLogo = (size) => logoHtml(null, size);
-export const TEMPLATES = makeTemplates(fallbackLogo);
+};
 
 /**
  * Exports the certificate as a PNG image.
- * Re-renders the template with the pre-loaded base64 logo,
+ * Re-renders the template with the embedded base64 logo,
  * then creates a temporary offscreen container to capture it cleanly.
- * 
- * @param {string} templateKey - e.g. 'winner', 'mvp', 'cyberpunk'
- * @param {object} formData    - { playerName, tournamentName, placement, game, date }
- * @param {string} certId      - filename for the download
  */
 export const exportCertificateAsPDF = async (templateKey, formData, certId) => {
   try {
-    // Step 1: Get templates with the real pre-loaded base64 logo
-    const templates = await ensureTemplates();
-    
-    const templateFn = templates[templateKey];
+    const templateFn = TEMPLATES[templateKey];
     if (!templateFn) throw new Error("Unknown template: " + templateKey);
 
-    // Step 2: Render the template HTML with the REAL logo baked in
+    // Render the template HTML with the REAL embedded logo
     const html = templateFn(formData);
 
-    // Step 3: Create a temporary offscreen container at FULL SIZE (no transforms)
+    // Create a temporary offscreen container at FULL SIZE (no transforms)
     const tempContainer = document.createElement('div');
     tempContainer.style.position = 'fixed';
     tempContainer.style.left = '-9999px';
@@ -295,20 +229,20 @@ export const exportCertificateAsPDF = async (templateKey, formData, certId) => {
     
     document.body.appendChild(tempContainer);
     
-    // Step 4: Wait for images inside to fully load + browser to paint
+    // Wait for images inside to fully load + browser to paint
     const images = tempContainer.querySelectorAll('img');
     if (images.length > 0) {
       await Promise.all(Array.from(images).map(img => {
         if (img.complete) return Promise.resolve();
         return new Promise((resolve) => {
           img.onload = resolve;
-          img.onerror = resolve; // don't block on failed images
+          img.onerror = resolve;
         });
       }));
     }
     await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
     
-    // Step 5: Capture with html2canvas
+    // Capture with html2canvas
     const canvas = await html2canvas(tempContainer, {
       scale: 2,
       useCORS: true,
@@ -318,10 +252,10 @@ export const exportCertificateAsPDF = async (templateKey, formData, certId) => {
       height: 1080,
     });
     
-    // Step 6: Clean up
+    // Clean up
     document.body.removeChild(tempContainer);
     
-    // Step 7: Download as PNG
+    // Download as PNG
     const imgData = canvas.toDataURL('image/png', 1.0);
     const link = document.createElement('a');
     link.download = (certId || 'certificate') + '.png';
@@ -331,7 +265,6 @@ export const exportCertificateAsPDF = async (templateKey, formData, certId) => {
     document.body.removeChild(link);
     
   } catch (err) {
-    // Show the exact error so we can debug
     console.error('Certificate generation error:', err);
     alert('CERTIFICATE ERROR:\n\n' + err.message + '\n\n' + (err.stack || ''));
     throw err;
